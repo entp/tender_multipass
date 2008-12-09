@@ -1,0 +1,41 @@
+Tender MultiPass
+===============
+
+Easily add auto-login cookie values for Tender (http://tenderapp.com)
+
+Setup
+=====
+
+* Install the plugin, and include the Tender::MultiPassMethods into your user model
+* Set up these 3 values:  Tender::MultiPass.site_key, 
+  Tender::MultiPass.cookie_domain, and Tender::MultiPass.support_domain
+* Use @user.tender_multipass(cookies) to modify cookies inside your controller request.
+
+* More info: http://help.tenderapp.com/faqs/setup-installation/login-from-cookies
+
+Example (Rails)
+=======
+
+# /config/initializers/tender_multi_pass.rb
+class Tender::MultiPass
+  self.site_key       = "abc"
+  self.support_domain = "help.xoo.com"
+  self.cookie_domain  = ".xoo.com"
+end
+
+# /app/models/user.rb
+class User < ActiveRecord::Base
+  include Tender::MultiPassMethods
+end
+
+# /app/controllers/sessions_controller.rb
+class SessionsController
+  def login
+    if user = User.authenticate(params[:login], params[:password])
+      user.tender_multipass(cookies, 1.week.from_now.to_i)
+    end
+    redirect_to "/"
+  end
+end
+
+Copyright (c) 2008-* rick olson, released under the MIT license
