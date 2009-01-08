@@ -17,7 +17,7 @@ Example (Rails)
 =======
 
 # /config/initializers/tender_multi_pass.rb
-class Tender::MultiPass
+Tender::MultiPass.class_eval do
   self.site_key       = "abc"
   self.support_domain = "help.xoo.com"
   self.cookie_domain  = ".xoo.com"
