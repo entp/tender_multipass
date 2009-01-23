@@ -38,4 +38,9 @@ class SessionsController
   end
 end
 
+Notes
+=====
+
+* It is assumed User#email is available
+
 Copyright (c) 2008-* rick olson, released under the MIT license
