@@ -42,5 +42,8 @@ Notes
 =====
 
 * It is assumed User#email is available
+* When testing, you must use strings rather than symbols to check for the cookies
+
+  assert_equal ['hello@example.com'], response.cookies['tender_email']
 
 Copyright (c) 2008-* rick olson, released under the MIT license
