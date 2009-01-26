@@ -36,6 +36,11 @@ class SessionsController
     end
     redirect_to "/"
   end
+
+  def logout
+    user.tender_expire(cookies) if user
+    redirect_to "/"
+  end
 end
 
 If you want to have Tender redirect to your site's login form and can't/don't want to use domain cookies you
