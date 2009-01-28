@@ -19,6 +19,12 @@ module Tender
   end
 end
 
+class Test::Unit::TestCase
+  def assert_cookie(cookie, expected)
+    assert_equal expected, cookie
+  end
+end
+
 class TenderMultipassTest < Test::Unit::TestCase
   def setup
     @user    = Tender::TestUser.new("seaguy@hero.com")
@@ -27,17 +33,17 @@ class TenderMultipassTest < Test::Unit::TestCase
   end
 
   def test_tender_email_cookie_is_set
-    assert_equal @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
+    assert_cookie @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
   end
 
   def test_tender_expires_cookie_is_set
-    assert_equal @cookies[:tender_expires], :value => "1234", :domain => Tender::MultiPass.cookie_domain
+    assert_cookie @cookies[:tender_expires], :value => "1234", :domain => Tender::MultiPass.cookie_domain
   end
 
   def test_tender_hash_cookie_is_set
     digest = OpenSSL::Digest::Digest.new("SHA1")
     hash   = OpenSSL::HMAC.hexdigest(digest, Tender::MultiPass.site_key, "#{Tender::MultiPass.support_domain}/#{@user.email}/1234")
-    assert_equal @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
+    assert_cookie @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
   end
 end
 
@@ -49,14 +55,14 @@ class TenderExpireTest < Test::Unit::TestCase
   end
 
   def test_tender_email_cookie_is_cleared
-    assert_equal @cookies.deleted_keys[:tender_email], :domain => Tender::MultiPass.cookie_domain
+    assert_cookie @cookies.deleted_keys[:tender_email], :domain => Tender::MultiPass.cookie_domain
   end
 
   def test_tender_expires_cookie_is_cleared
-    assert_equal @cookies.deleted_keys[:tender_expires], :domain => Tender::MultiPass.cookie_domain
+    assert_cookie @cookies.deleted_keys[:tender_expires], :domain => Tender::MultiPass.cookie_domain
   end
 
   def test_tender_hash_cookie_is_eaten
-    assert_equal @cookies.deleted_keys[:tender_hash], :domain => Tender::MultiPass.cookie_domain
+    assert_cookie @cookies.deleted_keys[:tender_hash], :domain => Tender::MultiPass.cookie_domain
   end
 end
