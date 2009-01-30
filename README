@@ -29,6 +29,11 @@ end
 # /app/models/user.rb
 class User < ActiveRecord::Base
   include Tender::MultiPassMethods
+
+  # Use this block to define a default hash for all Tender multipasses.
+  tender_multipass do |user|
+    {:external_id => user.company.id}
+  end
 end
 
 # /app/controllers/sessions_controller.rb
