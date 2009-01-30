@@ -24,5 +24,9 @@ module Tender
 
       Tender::MultiPass.new(self).create(cookies, default_options.merge(options))
     end
+
+    def tender_expire(cookies)
+      Tender::MultiPass.new(self).expire(cookies)
+    end
   end
 end

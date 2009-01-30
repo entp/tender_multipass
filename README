@@ -32,7 +32,7 @@ class User < ActiveRecord::Base
 
   # Use this block to define a default hash for all Tender multipasses.
   tender_multipass do |user|
-    {:external_id => user.company.id}
+    {:external_id => user.company.id, :account_balance => user.balance}
   end
 end
 
@@ -53,6 +53,41 @@ class SessionsController
     end
     redirect_to "/"
   end
+
+  def logout
+    user.tender_expire(cookies) if user
+    redirect_to "/"
+  end
 end
+
+If you want to have Tender redirect to your site's login form and can't/don't want to use domain cookies you can just pass the variables in the URL. 
+  
+  Tender -> click "login" -> goes to your site -> returns to Tender with URL params
+  
+Your login action should also check to see if the user is already logged in, so you can just bounce them back to Tender.
+You can implement this something like:
+
+# /app/controllers/sessions_controller.rb
+class SessionsController
+  def login
+    if logged_in? || current_user = User.authenticate(params[:login], params[:password])
+      if params[:tender]
+        auth = current_user.tender_multipass({}, 1.week.from_now.to_i)
+        redirect_to "http://your.tenderapp.com/login?email=#{auth[:tender_email]}&expires=#{auth[:tender_expires]}&hash=#{auth[:tender_hash]}"
+      else
+        redirect_to "/"
+      end
+    end
+  end
+end
+
+
+Notes
+=====
+
+* It is assumed User#email is available
+* When testing, you must use strings rather than symbols to check for the cookies
+
+  assert_equal ['hello@example.com'], response.cookies['tender_email']
 
 Copyright (c) 2008-* rick olson, released under the MIT license

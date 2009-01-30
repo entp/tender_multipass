@@ -31,6 +31,12 @@ module Tender
       generate_hmac("#{self.class.support_domain}/#{@user.email}/#{expires}")
     end
 
+    def expire(cookies)
+      [:tender_email, :tender_expires, :tender_hash].each do |key|
+        cookies.delete key, :domain => self.class.cookie_domain
+      end
+    end
+
   protected
     def cookie_value(value)
       { :value => value.to_s, :domain => self.class.cookie_domain }
