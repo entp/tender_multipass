@@ -11,13 +11,16 @@ Setup
   Tender::MultiPass.cookie_domain, and Tender::MultiPass.support_domain
 * Use @user.tender_multipass(cookies) to modify cookies inside your controller request.
 
+The 3 required cookie values (tender_email, tender_hash, and tender_expires) are all taken care of for you.  You can also set two special cookies to further identify users: tender_external_id, and tender_external_url.  These specify some text and an optional link that display next to users created by the automatic logging feature.  This is needed when you may have multiple users from different areas of your app that might have the same email address.  This is a potential issue in web applications that separate user accounts by some top level structure like Account or Company.
+
 * More info: http://help.tenderapp.com/faqs/setup-installation/login-from-cookies
 
 Example (Rails)
 =======
 
 # /config/initializers/tender_multi_pass.rb
-Tender::MultiPass.class_eval do
+# ensure the plugin class is loaded before proceeding
+Tender::MultiPass.class_eval do 
   self.site_key       = "abc"
   self.support_domain = "help.xoo.com"
   self.cookie_domain  = ".xoo.com"
@@ -26,13 +29,27 @@ end
 # /app/models/user.rb
 class User < ActiveRecord::Base
   include Tender::MultiPassMethods
+
+  # Use this block to define a default hash for all Tender multipasses.
+  tender_multipass do |user|
+    {:external_id => user.company.id, :account_balance => user.balance}
+  end
 end
 
 # /app/controllers/sessions_controller.rb
 class SessionsController
   def login
     if user = User.authenticate(params[:login], params[:password])
-      user.tender_multipass(cookies, 1.week.from_now.to_i)
+      # default method of creating a tender multipass
+      user.tender_multipass(cookies, 1.week.from_now)
+
+      # use a hash to set the expiration
+      user.tender_multipass(cookies, :expires => 1.week.from_now)
+
+      # specify custom tender_* cookies.
+      # These will be shown in the tender discussion to the support users only
+      # This adds a tender_account_balance cookie:
+      user.tender_multipass(cookies, :account_balance => user.balance)
     end
     redirect_to "/"
   end
@@ -43,8 +60,7 @@ class SessionsController
   end
 end
 
-If you want to have Tender redirect to your site's login form and can't/don't want to use domain cookies you
-can just pass the variables in the URL. 
+If you want to have Tender redirect to your site's login form and can't/don't want to use domain cookies you can just pass the variables in the URL. 
   
   Tender -> click "login" -> goes to your site -> returns to Tender with URL params
   
