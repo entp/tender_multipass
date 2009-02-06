@@ -60,7 +60,13 @@ class SessionsController
   end
 end
 
-If you want to have Tender redirect to your site's login form and can't/don't want to use domain cookies you can just pass the variables in the URL. 
+You can also set the user's name, instead of using their email address as the key.  Set the name of the field 
+as the final parameter.
+
+  user.tender_multipass(cookies, 1.week.from_now.to_i, :full_name)
+
+If you want to have Tender redirect to your site's login form and can't/don't want to use domain cookies you
+can just pass the variables in the URL. 
   
   Tender -> click "login" -> goes to your site -> returns to Tender with URL params
   

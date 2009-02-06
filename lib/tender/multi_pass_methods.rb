@@ -10,7 +10,7 @@ module Tender
       base.extend ClassMethods
     end
 
-    def tender_multipass(cookies, options = {})
+    def tender_multipass(cookies, options = nil, name_field = nil)
       default_options = \
         if multipass = self.class.tender_multipass
           multipass.call(self)
@@ -22,11 +22,7 @@ module Tender
         options = {:expires => options}
       end
 
-      Tender::MultiPass.new(self).create(cookies, default_options.merge(options))
-    end
-
-    def tender_expire(cookies)
-      Tender::MultiPass.new(self).expire(cookies)
+      Tender::MultiPass.new(self).create(cookies, default_options.merge(options), name_field)
     end
 
     def tender_expire(cookies)
