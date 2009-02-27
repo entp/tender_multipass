@@ -38,7 +38,7 @@ module Tender
     end
 
     def expire(cookies)
-      [:tender_email, :tender_expires, :tender_hash].each do |key|
+      [:tender_email, :tender_expires, :tender_hash, :tender_name].each do |key|
         cookies.delete key, :domain => self.class.cookie_domain
       end
     end
