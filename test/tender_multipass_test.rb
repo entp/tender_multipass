@@ -71,6 +71,10 @@ class TenderExpireTest < Test::Unit::TestCase
   def test_tender_hash_cookie_is_eaten
     assert_cookie @cookies.deleted_keys[:tender_hash], :domain => Tender::MultiPass.cookie_domain
   end
+  
+  def test_tender_name_cookie_is_eaten
+    assert_cookie @cookies.deleted_keys[:tender_name], :domain => Tender::MultiPass.cookie_domain
+  end
 end
 
 class TenderMultipassWithOptionsTest < Test::Unit::TestCase
