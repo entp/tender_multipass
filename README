@@ -57,7 +57,7 @@ class SessionsController
     if logged_in? || current_user = User.authenticate(params[:login], params[:password])
       if params[:tender]
         auth = current_user.tender_multipass({}, 1.week.from_now.to_i)
-        redirect_to "http://your.tenderapp.com/login?email=#{auth[:tender_email]}&expires=#{auth[:tender_expires]}&hash=#{auth[:tender_hash]}"
+        redirect_to "http://your.tenderapp.com/login?email=#{auth[:tender_email][:value]}&expires=#{auth[:tender_expires][:value]}&hash=#{auth[:tender_hash][:value]}"
       else
         redirect_to "/"
       end
