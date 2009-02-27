@@ -21,7 +21,8 @@ module Tender
       cookies[:tender_email]   = cookie_value(@user.email)
       cookies[:tender_expires] = cookie_value(expires)
       if name_field
-        name_field = cookies[:tender_name]  = cookie_value(@user.send(name_field))
+        name_field             = @user.send(name_field)
+        cookies[:tender_name]  = cookie_value(name_field)
       end
       cookies[:tender_hash]    = cookie_value(expiring_token(expires, name_field))
       cookies
