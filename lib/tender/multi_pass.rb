@@ -15,21 +15,31 @@ module Tender
     end
 
     # Sets tender cookie values on the given cookie jar.
-    def create(cookies, expires = nil, name_field = nil)
+    def create(cookies, options = {})
       return nil if self.class.site_key.nil?
-      expires = (expires || 1.week.from_now).to_i # we want unix time
+      expires = (options.delete(:expires) || 1.week.from_now).to_i # we want unix time
       cookies[:tender_email]   = cookie_value(@user.email)
       cookies[:tender_expires] = cookie_value(expires)
-      if name_field
-        name_field             = @user.send(name_field)
-        cookies[:tender_name]  = cookie_value(name_field)
+
+      # Optionally set the user's name. This is also signed.
+      if options[:name_field]
+        options[:name] = @user.send(options[:name_field])
       end
-      cookies[:tender_hash]    = cookie_value(expiring_token(expires, name_field))
+      options.each do |key, value|
+        cookies[:"tender_#{key}"] = cookie_value(value)
+      end
+      cookies[:tender_hash]    = cookie_value(expiring_token(expires, options[:name]))
       cookies
     end
 
     def expiring_token(expires, name_field=nil)
       generate_hmac([self.class.support_domain, @user.email, expires, name_field].compact.join("/"))
+    end
+
+    def expire(cookies)
+      [:tender_email, :tender_expires, :tender_hash].each do |key|
+        cookies.delete key, :domain => self.class.cookie_domain
+      end
     end
 
   protected
