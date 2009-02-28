@@ -25,27 +25,105 @@ module Tender
   end
 end
 
+class Test::Unit::TestCase
+  def assert_cookie(cookie, expected)
+    assert_equal expected, cookie
+  end
+end
+
 class TenderMultipassTest < Test::Unit::TestCase
   def setup
     @user    = Tender::TestUser.new("seaguy@hero.com", "Joe Seaguy")
-    @cookies = {}
+    @cookies = Tender::TestCookieJar.new 
     @user.tender_multipass(@cookies, 1234)
   end
 
   def test_tender_email_cookie_is_set
-    assert_equal({:value => @user.email, :domain => Tender::MultiPass.cookie_domain}, @cookies[:tender_email])
+    assert_cookie @cookies[:tender_email], { :value => @user.email, :domain => Tender::MultiPass.cookie_domain }
   end
 
   def test_tender_expires_cookie_is_set
-    assert_equal({:value => "1234", :domain => Tender::MultiPass.cookie_domain},      @cookies[:tender_expires])
+    assert_cookie @cookies[:tender_expires], { :value => "1234", :domain => Tender::MultiPass.cookie_domain }
   end
   
   def test_tender_name_not_required
-    @user.tender_multipass(@cookies, { :expires => 1234 })
     @user = Tender::TestUser.new("seaguy@hero.com")
+    @user.tender_multipass(@cookies, { :expires => 1234 })
     assert_nil @cookies[:tender_name]
   end
 
+end
+
+class TenderExpireTest < Test::Unit::TestCase
+  def setup
+    @user    = Tender::TestUser.new("seaguy@hero.com", "Sea Guy")
+    @cookies = Tender::TestCookieJar.new 
+    @user.tender_multipass(@cookies, { :expires => 1234, :name_field => :name })
+    @user.tender_expire(@cookies)
+  end
+
+  def test_tender_email_cookie_is_cleared
+    assert_cookie @cookies.deleted_keys[:tender_email], :domain => Tender::MultiPass.cookie_domain
+  end
+
+  def test_tender_expires_cookie_is_cleared
+    assert_cookie @cookies.deleted_keys[:tender_expires], :domain => Tender::MultiPass.cookie_domain
+  end
+
+  def test_tender_hash_cookie_is_eaten
+    assert_cookie @cookies.deleted_keys[:tender_hash], :domain => Tender::MultiPass.cookie_domain
+  end
+  
+  def test_tender_name_cookie_is_eaten
+    assert_cookie @cookies.deleted_keys[:tender_name], :domain => Tender::MultiPass.cookie_domain
+  end
+end
+
+class TenderMultipassWithOptionsTest < Test::Unit::TestCase
+  def setup
+    @user    = Tender::TestUser.new("seaguy@hero.com")
+    @cookies = Tender::TestCookieJar.new 
+    @user.tender_multipass(@cookies, :expires => 1234, :foo => 'bar')
+  end
+
+  def test_custom_tender_cookie_is_set
+    assert_cookie @cookies[:tender_foo], :value => 'bar', :domain => Tender::MultiPass.cookie_domain
+  end
+
+  def test_tender_email_cookie_is_set
+    assert_cookie @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
+  end
+
+  def test_tender_expires_cookie_is_set
+    assert_cookie @cookies[:tender_expires], :value => "1234", :domain => Tender::MultiPass.cookie_domain
+  end
+
+  def test_tender_hash_cookie_is_set
+    digest = OpenSSL::Digest::Digest.new("SHA1")
+    hash   = OpenSSL::HMAC.hexdigest(digest, Tender::MultiPass.site_key, "#{Tender::MultiPass.support_domain}/#{@user.email}/1234")
+    assert_cookie @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
+  end
+end
+
+class TenderMultipassWithDefaultOptionsTest < Test::Unit::TestCase
+  def setup
+    @user    = Tender::DefaultOptionUser.new("seaguy@hero.com")
+    @cookies = Tender::TestCookieJar.new 
+    @user.tender_multipass(@cookies, :expires => 1234)
+  end
+
+  def test_default_tender_cookie_is_set
+    assert_cookie @cookies[:tender_bar], :value => 'foo', :domain => Tender::MultiPass.cookie_domain
+  end
+
+  def test_tender_email_cookie_is_set
+    assert_cookie @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
+  end
+
+  def test_tender_expires_cookie_is_set
+    assert_cookie @cookies[:tender_expires], :value => "1234", :domain => Tender::MultiPass.cookie_domain
+  end
+  
   def test_tender_hash_cookie_is_set
     digest = OpenSSL::Digest::Digest.new("SHA1")
     hash   = OpenSSL::HMAC.hexdigest(digest, Tender::MultiPass.site_key, "#{Tender::MultiPass.support_domain}/#{@user.email}/1234")
@@ -57,8 +135,8 @@ end
 class TenderMultipassWithNameTest < Test::Unit::TestCase
   def setup
     @user    = Tender::TestUser.new("seaguy@hero.com", "Sea Guy")
-    @cookies = {}
-    @user.tender_multipass(@cookies, { :expires => 1234, :name_field => :name })
+    @cookies = Tender::TestCookieJar.new 
+    @user.tender_multipass(@cookies, :expires => 1234, :name_field => :name)
   end
 
   def test_tender_name_is_set
@@ -69,77 +147,5 @@ class TenderMultipassWithNameTest < Test::Unit::TestCase
     digest = OpenSSL::Digest::Digest.new("SHA1")
     hash   = OpenSSL::HMAC.hexdigest(digest, Tender::MultiPass.site_key, "#{Tender::MultiPass.support_domain}/#{@user.email}/1234/Sea Guy")
     assert_equal({ :value => hash, :domain => Tender::MultiPass.cookie_domain },      @cookies[:tender_hash])
-  end
-end
-
-class TenderMultipassWithOptionsTest < Test::Unit::TestCase
-  def setup
-    @user    = Tender::TestUser.new("seaguy@hero.com")
-    @cookies = {}
-    @user.tender_multipass(@cookies, :expires => 1234, :foo => 'bar')
-  end
-
-  def test_custom_tender_cookie_is_set
-    assert_equal @cookies[:tender_foo], :value => 'bar', :domain => Tender::MultiPass.cookie_domain
-  end
-
-  def test_tender_email_cookie_is_set
-    assert_equal @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
-  end
-
-  def test_tender_expires_cookie_is_set
-    assert_equal @cookies[:tender_expires], :value => "1234", :domain => Tender::MultiPass.cookie_domain
-  end
-
-  def test_tender_hash_cookie_is_set
-    digest = OpenSSL::Digest::Digest.new("SHA1")
-    hash   = OpenSSL::HMAC.hexdigest(digest, Tender::MultiPass.site_key, "#{Tender::MultiPass.support_domain}/#{@user.email}/1234")
-    assert_equal @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
-  end
-end
-
-class TenderMultipassWithDefaultOptionsTest < Test::Unit::TestCase
-  def setup
-    @user    = Tender::DefaultOptionUser.new("seaguy@hero.com")
-    @cookies = {}
-    @user.tender_multipass(@cookies, :expires => 1234)
-  end
-
-  def test_default_tender_cookie_is_set
-    assert_equal @cookies[:tender_bar], :value => 'foo', :domain => Tender::MultiPass.cookie_domain
-  end
-
-  def test_tender_email_cookie_is_set
-    assert_equal @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
-  end
-
-  def test_tender_expires_cookie_is_set
-    assert_equal @cookies[:tender_expires], :value => "1234", :domain => Tender::MultiPass.cookie_domain
-  end
-
-  def test_tender_hash_cookie_is_set
-    digest = OpenSSL::Digest::Digest.new("SHA1")
-    hash   = OpenSSL::HMAC.hexdigest(digest, Tender::MultiPass.site_key, "#{Tender::MultiPass.support_domain}/#{@user.email}/1234")
-    assert_equal @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
-  end
-end
-
-class TenderExpireTest < Test::Unit::TestCase
-  def setup
-    @user    = Tender::TestUser.new("seaguy@hero.com")
-    @cookies = Tender::TestCookieJar.new 
-    @user.tender_expire(@cookies)
-  end
-
-  def test_tender_email_cookie_is_cleared
-    assert_equal @cookies.deleted_keys[:tender_email], :domain => Tender::MultiPass.cookie_domain
-  end
-
-  def test_tender_expires_cookie_is_cleared
-    assert_equal @cookies.deleted_keys[:tender_expires], :domain => Tender::MultiPass.cookie_domain
-  end
-
-  def test_tender_hash_cookie_is_eaten
-    assert_equal @cookies.deleted_keys[:tender_hash], :domain => Tender::MultiPass.cookie_domain
   end
 end
