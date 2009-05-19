@@ -1,32 +1,8 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
-module Tender
-  class TestUser < Struct.new(:email)
-    include Tender::MultiPassMethods
-  end
-
-  class DefaultOptionUser < TestUser
-    tender_multipass do |user|
-      {:bar => 'foo'}
-    end
-  end
-
-  MultiPass.site_key       = "abc"
-  MultiPass.support_domain = "help.xoo.com"
-  MultiPass.cookie_domain  = ".xoo.com"
-
-  class TestCookieJar < Hash
-    attr_reader :deleted_keys
-
-    def delete(key, opts = {})
-      @deleted_keys ||= {}
-      @deleted_keys[key] = opts
-    end
-  end
-end
-
 class TenderMultipassTest < Test::Unit::TestCase
   def setup
+    Tender::MultiPass.backend = :hash
     @user    = Tender::TestUser.new("seaguy@hero.com")
     @cookies = {}
     @user.tender_multipass(@cookies, 1234)
@@ -71,6 +47,7 @@ end
 
 class TenderMultipassWithOptionsTest < Test::Unit::TestCase
   def setup
+    Tender::MultiPass.backend = :hash
     @user    = Tender::TestUser.new("seaguy@hero.com")
     @cookies = {}
     @user.tender_multipass(@cookies, :expires => 1234, :foo => 'bar')
@@ -97,6 +74,7 @@ end
 
 class TenderMultipassWithDefaultOptionsTest < Test::Unit::TestCase
   def setup
+    Tender::MultiPass.backend = :hash
     @user    = Tender::DefaultOptionUser.new("seaguy@hero.com")
     @cookies = {}
     @user.tender_multipass(@cookies, :expires => 1234)
@@ -123,6 +101,7 @@ end
 
 class TenderExpireTest < Test::Unit::TestCase
   def setup
+    Tender::MultiPass.backend = :hash
     @user    = Tender::TestUser.new("seaguy@hero.com")
     @cookies = Tender::TestCookieJar.new 
     @user.tender_expire(@cookies)
