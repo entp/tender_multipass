@@ -6,6 +6,16 @@ module Tender
       attr_accessor :site_key
       attr_accessor :support_domain
       attr_accessor :cookie_domain
+      attr_accessor :backends
+
+      def backend
+        @backend ||= Tender::HashedMultiPass
+      end
+
+      def backend=(value)
+        value = @backends[value] if @backends.key?(value)
+        @backend = value
+      end
     end
 
     attr_reader :user
@@ -68,3 +78,5 @@ module Tender
     end
   end
 end
+
+Tender::MultiPass.backends = {:hash => Tender::HashedMultiPass}

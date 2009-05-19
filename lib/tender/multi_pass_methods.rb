@@ -16,11 +16,6 @@ module Tender
       def tender_multipass(&block)
         block ? @tender_multipass = block : @tender_multipass
       end
-
-      # Points to the Tender::MultiPass class that implements the cookie format.
-      def tender_multipass_class
-        @tender_multipass_class ||= Tender::HashedMultiPass
-      end
     end
 
     def self.included(base)
@@ -44,7 +39,7 @@ module Tender
 
     # Points to an instance of the Tender::MultiPass object for this record.
     def tender_multipass_object
-      @tender_multipass_object ||= self.class.tender_multipass_class.new(self)
+      @tender_multipass_object ||= Tender::MultiPass.backend.new(self)
     end
 
     # Points to a hash of the default Tender::MultiPass options.  Call the 
