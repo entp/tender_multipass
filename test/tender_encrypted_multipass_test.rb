@@ -56,7 +56,7 @@ class TenderMultipassTest < Test::Unit::TestCase
   end
 
   def test_validates_cookie
-    options   = {'expires' => @date.to_s(:db), 'email' => @user.email, 'display_name' => 'Bob', 'username' => 'bob'}
+    options   = {:expires => @date.to_s(:db), :email => @user.email, :display_name => 'Bob', :username => 'bob'}
     encrypted = @key.encrypt64(options.to_json)
     assert_equal options, @user.tender_multipass_object.valid?(encrypted)
   end

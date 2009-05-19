@@ -100,11 +100,13 @@ module Tender
 
       options = ActiveSupport::JSON.decode(json)
       
-      if !options.is_a?(Hash) || options['expires'].blank?
+      if !options.is_a?(Hash)
         raise MultiPass::JSONError
       end
 
-      if Time.now.utc > Time.parse(options['expires'])
+      options.symbolize_keys!
+
+      if options[:expires].blank? || Time.now.utc > Time.parse(options[:expires])
         raise MultiPass::ExpiredError
       end
 
