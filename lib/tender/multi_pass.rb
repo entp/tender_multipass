@@ -2,6 +2,11 @@ require 'openssl'
 
 module Tender
   class MultiPass
+    class Invalid      < StandardError; end
+    class ExpiredError < Invalid;       end
+    class JSONError    < Invalid;       end
+    class DecryptError < Invalid;       end
+
     class << self
       attr_accessor :site_key
       attr_accessor :support_domain
@@ -83,6 +88,28 @@ module Tender
   end
 
   class EncryptedMultiPass < MultiPass
+    def valid?(encrypted)
+      json = crypto_key.decrypt64(encrypted)
+      
+      if json.nil?
+        raise MultiPass::DecryptError
+      end
+
+      options = ActiveSupport::JSON.decode(json)
+      
+      if !options.is_a?(Hash) || options['expires'].blank?
+        raise MultiPass::JSONError
+      end
+
+      if Time.now.utc > Time.parse(options['expires'])
+        raise MultiPass::ExpiredError
+      end
+
+      options
+    rescue ActiveSupport::JSON::ParseError
+      raise MultiPass::JSONError
+    end
+
     def create(cookies, options = {})
       name  = options.delete(:cookie_name) || self.class.superclass.cookie_name
       value = create_encrypted_string(options)
