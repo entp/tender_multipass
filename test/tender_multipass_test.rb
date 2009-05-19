@@ -43,7 +43,7 @@ class TenderMultipassTest < Test::Unit::TestCase
   def test_tender_hash_cookie_is_set
     digest = OpenSSL::Digest::Digest.new("SHA1")
     hash   = OpenSSL::HMAC.hexdigest(digest, Tender::MultiPass.site_key, "#{Tender::MultiPass.support_domain}/#{@user.email}/1234")
-    assert_equal @cookies[:tender_email], :value => @user.email, :domain => Tender::MultiPass.cookie_domain
+    assert_equal @cookies[:tender_hash], :value => hash, :domain => Tender::MultiPass.cookie_domain
   end
 end
 
