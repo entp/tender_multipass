@@ -19,7 +19,7 @@ module Tender
 
       # Points to the Tender::MultiPass class that implements the cookie format.
       def tender_multipass_class
-        @tender_multipass_class ||= Tender::MultiPass
+        @tender_multipass_class ||= Tender::HashedMultiPass
       end
     end
 
