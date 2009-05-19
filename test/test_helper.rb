@@ -7,7 +7,7 @@ require 'tender/multi_pass_methods'
 require 'cgi'
 
 module Tender
-  class TestUser < Struct.new(:email)
+  class TestUser < Struct.new(:email, :name)
     include Tender::MultiPassMethods
   end
 
@@ -28,5 +28,11 @@ module Tender
       @deleted_keys ||= {}
       @deleted_keys[key] = opts
     end
+  end
+end
+
+class Test::Unit::TestCase
+  def assert_cookie(cookie, expected)
+    assert_equal expected, cookie
   end
 end

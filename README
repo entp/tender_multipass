@@ -11,7 +11,11 @@ Setup
   Tender::MultiPass.cookie_domain, and Tender::MultiPass.support_domain
 * Use @user.tender_multipass(cookies) to modify cookies inside your controller request.
 
-The 3 required cookie values (tender_email, tender_hash, and tender_expires) are all taken care of for you.  You can also set two special cookies to further identify users: tender_external_id, and tender_external_url.  These specify some text and an optional link that display next to users created by the automatic logging feature.  This is needed when you may have multiple users from different areas of your app that might have the same email address.  This is a potential issue in web applications that separate user accounts by some top level structure like Account or Company.
+The 3 required cookie values (tender_email, tender_hash, and tender_expires) are all taken care of for you.  
+You can also set three special cookies to further identify users: tender_name, tender_external_id, and tender_external_url.  
+These specify some text and an optional link that display next to users created by the automatic logging feature.  
+This is needed when you may have multiple users from different areas of your app that might have the same email address.  
+This is a potential issue in web applications that separate user accounts by some top level structure like Account or Company.
 
 * More info: http://help.tenderapp.com/faqs/setup-installation/login-from-cookies
 
@@ -50,6 +54,12 @@ class SessionsController
       # These will be shown in the tender discussion to the support users only
       # This adds a tender_account_balance cookie:
       user.tender_multipass(cookies, :account_balance => user.balance)
+      
+      # fill in the profile's visible name field by sending the field name
+      user.tender_multipass(cookies, :name_field => :login)
+
+      # fill in the profile's visible name field by sending the name
+      user.tender_multipass(cookies, :name => user.login)
     end
     redirect_to "/"
   end
@@ -73,7 +83,7 @@ class SessionsController
     if logged_in? || current_user = User.authenticate(params[:login], params[:password])
       if params[:tender]
         auth = current_user.tender_multipass({}, 1.week.from_now.to_i)
-        redirect_to "http://your.tenderapp.com/login?email=#{auth[:tender_email]}&expires=#{auth[:tender_expires]}&hash=#{auth[:tender_hash]}"
+        redirect_to "http://your.tenderapp.com/login?email=#{auth[:tender_email][:value]}&expires=#{auth[:tender_expires][:value]}&hash=#{auth[:tender_hash][:value]}"
       else
         redirect_to "/"
       end
