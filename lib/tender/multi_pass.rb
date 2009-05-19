@@ -162,10 +162,6 @@ module Tender
     def crypto_key
       @crypto_key ||= EzCrypto::Key.with_password(self.class.superclass.support_domain, self.class.superclass.site_key)
     end
-
-    def cookie_value(value)
-      { :value => value.to_s, :domain => self.class.superclass.cookie_domain }
-    end
   end
 end
 
