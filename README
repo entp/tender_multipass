@@ -3,7 +3,7 @@ Tender MultiPass
 
 Easily add auto-login cookie values for Tender (http://tenderapp.com)
 
-Setup
+Setup (Unencrypted Cookie Values)
 =====
 
 * Install the plugin, and include the Tender::MultiPassMethods into your user model
@@ -19,7 +19,7 @@ This is a potential issue in web applications that separate user accounts by som
 
 * More info: http://help.tenderapp.com/faqs/setup-installation/login-from-cookies
 
-Example (Rails)
+Example (Rails, Unencrypted Cookie Values)
 =======
 
 # /config/initializers/tender_multi_pass.rb
@@ -36,7 +36,9 @@ class User < ActiveRecord::Base
 
   # Use this block to define a default hash for all Tender multipasses.
   tender_multipass do |user|
-    {:external_id => user.company.id, :account_balance => user.balance}
+    {:external_id => user.company.id, :account_balance => user.balance,
+    # you can specify :name and :email if your model uses different attribute names
+     :name => user.login, :email => user.email_address}
   end
 end
 
