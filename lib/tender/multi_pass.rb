@@ -41,17 +41,19 @@ module Tender
     def create(cookies, options = {})
       return nil if self.class.superclass.site_key.nil?
       expires = (options.delete(:expires) || 1.week.from_now).to_i
-      cookies[:tender_email]   = cookie_value(@user.email)
-      cookies[:tender_expires] = cookie_value(expires)
-      cookies[:tender_hash]    = cookie_value(expiring_token(expires))
+      options[:email] ||= @user.email
       options.each do |key, value|
         cookies[:"tender_#{key}"] = cookie_value(value)
       end
+      cookies[:tender_expires]   = cookie_value(expires)
+      cookies[:tender_hash]      = cookie_value(expiring_token(expires, options))
       cookies
     end
 
-    def expiring_token(expires)
-      generate_hmac("#{self.class.superclass.support_domain}/#{@user.email}/#{expires}")
+    def expiring_token(expires, options = {})
+      values = [self.class.superclass.support_domain, options[:email], expires, options[:name]]
+      values.compact!
+      generate_hmac(values * "/")
     end
 
     def expire(cookies)
