@@ -24,7 +24,7 @@ Example (Rails)
 
 # /config/initializers/tender_multi_pass.rb
 # ensure the plugin class is loaded before proceeding
-Tender::MultiPass.class_eval do 
+Tender::MultiPass.class_eval do
   self.site_key       = "abc"
   self.support_domain = "help.xoo.com"
   self.cookie_domain  = ".xoo.com"
