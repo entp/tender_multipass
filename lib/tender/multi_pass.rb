@@ -20,7 +20,7 @@ module Tender
       end
 
       def backend=(value)
-        raise ArgumentError, 'Backend not registered' unless @backends[value]
+        raise ArgumentError, 'Backend not registered' if value.is_a?(Symbol) && !@backends[value]
         value = @backends[value] if @backends.key?(value)
         @backend = value
       end
