@@ -20,8 +20,8 @@ module Tender
       end
 
       def backend=(value)
+        raise ArgumentError, 'Backend not registered' unless @backends[value]
         value = @backends[value] if @backends.key?(value)
-        raise ArgumentError, 'Backend not found' if value.is_a?(Symbol)
         @backend = value
       end
     end
@@ -172,5 +172,6 @@ begin
   gem 'ezcrypto'
   require 'ezcrypto'
   Tender::MultiPass.backends[:encrypted] = Tender::EncryptedMultiPass
+  Tender::MultiPass.backend = :encrypted
 rescue Gem::LoadError, LoadError
 end
