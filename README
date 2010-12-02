@@ -94,6 +94,23 @@ class SessionsController
 end
 
 
+Setup (Encrypted Cookie Values)
+=====
+
+* Get SSO working with unecrypted values above. Do not start here.
+
+* To the 3 existing Tender::MultiPass definitions (typically in
+tender_multi_pass.rb) add:
+  self.backend = :encrypted
+
+* Require the "ezcrypto" gem, like by adding this to your Gemfile:
+  gem "ezcrypto"
+
+* In the class which requires Tender::MultiPassMethods (typically your User
+model), generate the SSO string for the redirect URL with:
+  tender_multipass_object.create_encrypted_string(tender_default_options)
+
+
 Notes
 =====
 

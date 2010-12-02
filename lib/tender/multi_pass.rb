@@ -21,6 +21,7 @@ module Tender
 
       def backend=(value)
         value = @backends[value] if @backends.key?(value)
+        raise ArgumentError, 'Backend not found' if value.is_a?(Symbol)
         @backend = value
       end
     end
