@@ -97,9 +97,9 @@ end
 Setup (Encrypted Cookie Values)
 =====
 
-* Get SSO working with unecrypted values above. Do not start here.
+* Follow "Setup - Unencrypted Cookie Values" instructions. These are additive.
 
-* Require the "ezcrypto" gem, like by adding this to your Gemfile:
+* Require the "ezcrypto" gem, like by adding this to your bundler Gemfile:
   gem "ezcrypto"
 
 * Optional: to force only the Encrypted backend instead of depending 
